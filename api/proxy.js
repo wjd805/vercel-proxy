@@ -1,7 +1,10 @@
 const UPSTREAM = 'https://ruihengstar.94751111.xyz';
 
-// 处理所有请求：代理到源站
-async function handleRequest(request) {
+export const config = {
+    runtime: 'edge',
+};
+
+export default async function handler(request) {
     const url = new URL(request.url);
     const upstreamUrl = new URL(UPSTREAM + url.pathname + url.search);
 
@@ -10,7 +13,7 @@ async function handleRequest(request) {
         method: request.method,
         headers: new Headers(request.headers),
         body: request.method !== 'GET' && request.method !== 'HEAD' ? request.body : undefined,
-        redirect: 'manual', // 不自动跟随重定向，手动处理
+        redirect: 'manual',
     });
 
     // 修改 Host 头为源站
@@ -37,7 +40,6 @@ async function handleRequest(request) {
     const contentType = response.headers.get('Content-Type') || '';
     if (contentType.includes('text/html') && response.body) {
         let html = await response.text();
-        // 将页面中硬编码的源站 URL 替换为相对路径
         html = html.replace(new RegExp(UPSTREAM, 'g'), new URL(request.url).origin);
         response = new Response(html, {
             status: response.status,
@@ -46,15 +48,9 @@ async function handleRequest(request) {
         });
     }
 
-    // 添加允许跨域头
+    // 添加允许跨域头，移除 iframe 限制
     response.headers.set('Access-Control-Allow-Origin', '*');
-    response.headers.delete('X-Frame-Options'); // 如果有则移除，允许 iframe
+    response.headers.delete('X-Frame-Options');
 
     return response;
 }
-
-export default {
-    async fetch(request, env, ctx) {
-        return handleRequest(request);
-    },
-};
