@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "description": "反向代理 ruihengstar.94751111.xyz 到自定义域名",
-  "main": "index.js",
-  "scripts": {
-    "dev": "vercel dev"
-  },
-  "dependencies": {}
+  "type": "module",
+  "main": "index.js"
 }
